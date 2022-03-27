@@ -1,6 +1,8 @@
 #ifndef PYODBCCOMPAT_H
 #define PYODBCCOMPAT_H
 
+/*
+
 // Macros and functions to ease compatibility with Python 2 and Python 3.
 
 #if PY_VERSION_HEX >= 0x03000000 && PY_VERSION_HEX < 0x03010000
@@ -155,4 +157,5 @@ inline Py_ssize_t TextCopyToUnicode(Py_UNICODE* buffer, PyObject* o)
 int PyCodec_KnownEncoding(const char *encoding);
 #endif
 
+*/
 #endif // PYODBCCOMPAT_H

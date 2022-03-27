@@ -1,5 +1,6 @@
 #include "pyodbc.h"
 
+/*
 bool Text_EqualsI(PyObject* lhs, const char* rhs)
 {
 #if PY_MAJOR_VERSION < 3
@@ -43,3 +44,4 @@ int PyCodec_KnownEncoding(const char *encoding)
     return 0;
 }
 #endif
+*/

@@ -12,6 +12,9 @@
 #ifndef PYODBC_H
 #define PYODBC_H
 
+#define Py_LIMITED_API 0x03060000
+
+
 #ifdef _MSC_VER
 // The MS headers generate a ton of warnings.
 #pragma warning(push, 0)
@@ -56,15 +59,15 @@ typedef unsigned long long UINT64;
 #include <sql.h>
 #include <sqlext.h>
 
-#if PY_VERSION_HEX < 0x02050000 && !defined(PY_SSIZE_T_MIN)
-typedef int Py_ssize_t;
-#define PY_SSIZE_T_MAX INT_MAX
-#define PY_SSIZE_T_MIN INT_MIN
-#define PyInt_AsSsize_t PyInt_AsLong
-#define lenfunc inquiry
-#define ssizeargfunc intargfunc
-#define ssizeobjargproc intobjargproc
-#endif
+/*  #if PY_VERSION_HEX < 0x02050000 && !defined(PY_SSIZE_T_MIN)  */
+/*  typedef int Py_ssize_t;  */
+/*  #define PY_SSIZE_T_MAX INT_MAX  */
+/*  #define PY_SSIZE_T_MIN INT_MIN  */
+/*  #define PyInt_AsSsize_t PyInt_AsLong  */
+/*  #define lenfunc inquiry  */
+/*  #define ssizeargfunc intargfunc  */
+/*  #define ssizeobjargproc intobjargproc  */
+/*  #endif  */
 
 #ifndef _countof
 #define _countof(a) (sizeof(a) / sizeof(a[0]))

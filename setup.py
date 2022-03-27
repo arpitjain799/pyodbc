@@ -88,7 +88,7 @@ def main():
         'maintainer':       "Michael Kleehammer",
         'maintainer_email': "michael@kleehammer.com",
 
-        'ext_modules': [Extension('pyodbc', sorted(files), **settings)],
+        'ext_modules': [Extension('_pyodbc', sorted(files), **settings)],
 
         'data_files': [
             ('', ['src/pyodbc.pyi'])  # places pyodbc.pyi alongside pyodbc.py in site-packages

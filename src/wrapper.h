@@ -67,7 +67,7 @@ public:
     }
 };
 
-
+/*
 class Tuple
     : public Object
 {
@@ -82,19 +82,20 @@ public:
     {
     }
 
-    operator PyTupleObject*()
+    operator PyObject*()
     {
-        return (PyTupleObject*)p;
+        return (PyObject*)p;
     }
 
     PyObject*& operator[](int i)
     {
         I(p != 0);
-        return PyTuple_GET_ITEM(p, i);
+        return PyTuple_GetItem(p, i);
     }
 
-    Py_ssize_t size() { return p ? PyTuple_GET_SIZE(p) : 0; }
+    Py_ssize_t size() { return p ? PyTuple_GetSize(p) : 0; }
 };
+*/
 
 
 #ifdef WINVER
