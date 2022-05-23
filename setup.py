@@ -11,18 +11,9 @@ except ImportError:
 
 from distutils.extension import Extension
 from distutils.errors import *
-
-if sys.hexversion >= 0x03000000:
-    from configparser import ConfigParser
-else:
-    from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 OFFICIAL_BUILD = 9999
-
-
-def _print(s):
-    # Python 2/3 compatibility
-    sys.stdout.write(s + '\n')
 
 
 class VersionCommand(Command):
@@ -72,7 +63,7 @@ def main():
 
     settings = get_compiler_settings(version_str)
 
-    files = [ relpath(join('src', f)) for f in os.listdir('src') if f.endswith('.cpp') ]
+    files = [relpath(join('_pyodbc', f)) for f in os.listdir('_pyodbc') if f.endswith('.cpp')]
 
     if exists('MANIFEST'):
         os.remove('MANIFEST')
@@ -88,11 +79,8 @@ def main():
         'maintainer':       "Michael Kleehammer",
         'maintainer_email': "michael@kleehammer.com",
 
+        'packages': ['pyodbc'],
         'ext_modules': [Extension('_pyodbc', sorted(files), **settings)],
-
-        'data_files': [
-            ('', ['src/pyodbc.pyi'])  # places pyodbc.pyi alongside pyodbc.py in site-packages
-        ],
 
         'license': 'MIT',
 
@@ -271,7 +259,7 @@ def get_version():
         name, numbers = _get_version_git()
 
     if not numbers:
-        _print('WARNING: Unable to determine version.  Using 4.0.0.0')
+        print('WARNING: Unable to determine version.  Using 4.0.0.0')
         name, numbers = '4.0.0-unsupported', [4,0,0,0]
 
     return name, numbers
@@ -295,7 +283,7 @@ def _get_version_pkginfo():
 def _get_version_git():
     n, result = getoutput("git describe --tags --match [0-9]*")
     if n:
-        _print('WARNING: git describe failed with: %s %s' % (n, result))
+        print('WARNING: git describe failed with: %s %s' % (n, result))
         return None, None
 
     match = re.match(r'(\d+).(\d+).(\d+) (?: -(\d+)-g[0-9a-z]+)?', result, re.VERBOSE)
