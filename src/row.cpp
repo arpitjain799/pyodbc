@@ -256,62 +256,6 @@ static int Row_setattro(PyObject* o, PyObject *name, PyObject* v)
 }
 
 
-#if PY_MAJOR_VERSION < 3
-static PyObject* Row_repr(PyObject* o)
-{
-    Row* self = (Row*)o;
-
-    if (self->cValues == 0)
-        return PyString_FromString("()");
-
-    Object pieces(PyTuple_New(self->cValues));
-    if (!pieces)
-        return 0;
-
-    Py_ssize_t length = 2 + (2 * (self->cValues-1)); // parens + ', ' separators
-
-    for (Py_ssize_t i = 0; i < self->cValues; i++)
-    {
-        PyObject* piece = PyObject_Repr(self->apValues[i]);
-        if (!piece)
-            return 0;
-
-        length += Text_Size(piece);
-
-        PyTuple_SET_ITEM(pieces.Get(), i, piece);
-    }
-
-    if (self->cValues == 1)
-    {
-        // Need a trailing comma: (value,)
-        length += 2;
-    }
-
-    PyObject* result = Text_New(length);
-    if (!result)
-        return 0;
-    TEXT_T* buffer = Text_Buffer(result);
-    Py_ssize_t offset = 0;
-    buffer[offset++] = '(';
-    for (Py_ssize_t i = 0; i < self->cValues; i++)
-    {
-        PyObject* item = PyTuple_GET_ITEM(pieces.Get(), i);
-        memcpy(&buffer[offset], Text_Buffer(item), Text_Size(item) * sizeof(TEXT_T));
-        offset += Text_Size(item);
-
-        if (i != self->cValues-1 || self->cValues == 1)
-        {
-            buffer[offset++] = ',';
-            buffer[offset++] = ' ';
-        }
-    }
-    buffer[offset++] = ')';
-
-    I(offset == length);
-
-    return result;
-}
-#else // >= Python 3.3
 static PyObject* Row_repr(PyObject* o)
 {
     Row* self = (Row*)o;
@@ -378,7 +322,6 @@ static PyObject* Row_repr(PyObject* o)
 
     return result;
 }
-#endif
 
 static PyObject* Row_richcompare(PyObject* olhs, PyObject* orhs, int op)
 {
@@ -456,13 +399,8 @@ static PyObject* Row_subscript(PyObject* o, PyObject* key)
     if (PySlice_Check(key))
     {
         Py_ssize_t start, stop, step, slicelength;
-#if PY_VERSION_HEX >= 0x03020000
         if (PySlice_GetIndicesEx(key, row->cValues, &start, &stop, &step, &slicelength) < 0)
             return 0;
-#else
-        if (PySlice_GetIndicesEx((PySliceObject*)key, row->cValues, &start, &stop, &step, &slicelength) < 0)
-            return 0;
-#endif
 
         if (slicelength <= 0)
             return PyTuple_New(0);
