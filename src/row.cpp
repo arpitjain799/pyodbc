@@ -260,67 +260,18 @@ static PyObject* Row_repr(PyObject* o)
 {
     Row* self = (Row*)o;
 
-    if (self->cValues == 0)
-        return PyUnicode_FromString("()");
+    // I'm going to hope this doesn't get used a lot and for now I'm going to build a tuple and
+    // then let it handle repr.  There is a _PyUnicode_Writer object defined in Python that we
+    // don't have access to.
 
-    Object pieces(PyTuple_New(self->cValues));
-    if (!pieces)
-        return 0;
-
-    Py_ssize_t length = 2 + (2 * (self->cValues-1)); // parens + ', ' separators
-    int result_kind = PyUnicode_1BYTE_KIND;
+    Object t(PyTuple_New(self->cValues));
+    if (!t)
+      return 0;
 
     for (Py_ssize_t i = 0; i < self->cValues; i++)
-    {
-        PyObject* piece = PyObject_Repr(self->apValues[i]);
-        if (!piece)
-            return 0;
+      PyTuple_SET_ITEM((PyTupleObject*)t.Get(), i, self->apValues[i]);
 
-        length += PyUnicode_GET_LENGTH(piece);
-        int kind = PyUnicode_KIND(piece);
-        if (result_kind < kind)
-            result_kind = kind;
-
-        PyTuple_SET_ITEM(pieces.Get(), i, piece);
-    }
-
-    if (self->cValues == 1)
-    {
-        // Need a trailing comma: (value,)
-        length += 2;
-    }
-    Py_UCS4 maxchar = 0x10ffff;
-    if (result_kind == PyUnicode_2BYTE_KIND)
-        maxchar = 0xffff;
-    else if (result_kind == PyUnicode_1BYTE_KIND)
-        maxchar = 0xff;
-    PyObject* result = PyUnicode_New(length, maxchar);
-    if (!result)
-        return 0;
-    Py_ssize_t offset = 0;
-    PyUnicode_WriteChar(result, offset++, (Py_UCS4)'(');
-    for (Py_ssize_t i = 0; i < self->cValues; i++)
-    {
-        PyObject* item = PyTuple_GET_ITEM(pieces.Get(), i);
-        Py_ssize_t count = PyUnicode_GET_LENGTH(item);
-        Py_ssize_t n = PyUnicode_CopyCharacters(result, offset, item, 0, count);
-        if (n < 0)
-            return 0;
-        offset += count;
-
-        if (i != self->cValues-1 || self->cValues == 1)
-        {
-            PyUnicode_WriteChar(result, offset++, (Py_UCS4)',');
-            PyUnicode_WriteChar(result, offset++, (Py_UCS4)' ');
-        }
-    }
-    PyUnicode_WriteChar(result, offset++, (Py_UCS4)')');
-    if (PyUnicode_READY(result) < 0)
-        return 0;
-
-    I(offset == length);
-
-    return result;
+    return PyObject_Repr(t);
 }
 
 static PyObject* Row_richcompare(PyObject* olhs, PyObject* orhs, int op)
