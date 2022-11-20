@@ -152,7 +152,7 @@ bool UseNativeUUID()
 
 HENV henv = SQL_NULL_HANDLE;
 
-Py_UNICODE chDecimal = '.';
+char chDecimal = '.';
 
 
 PyObject* GetClassForThread(const char* szModule, const char* szClass)
@@ -269,12 +269,8 @@ static void init_locale_info()
     }
 
     PyObject* value = PyDict_GetItemString(ldict, "decimal_point");
-    if (value)
-    {
-        if (PyBytes_Check(value) && PyBytes_Size(value) == 1)
-            chDecimal = (Py_UNICODE)PyBytes_AS_STRING(value)[0];
-        if (PyUnicode_Check(value) && PyUnicode_GET_SIZE(value) == 1)
-            chDecimal = PyUnicode_AS_UNICODE(value)[0];
+    if (value && PyUnicode_GET_SIZE(value) == 1) {
+      chDecimal = *(char*)PyUnicode_1BYTE_DATA(value);
     }
 }
 
@@ -698,24 +694,19 @@ static PyObject* mod_timestampfromticks(PyObject* self, PyObject* args)
 static PyObject* mod_setdecimalsep(PyObject* self, PyObject* args)
 {
     UNUSED(self);
-    if (!PyUnicode_Check(PyTuple_GET_ITEM(args, 0)) && !PyUnicode_Check(PyTuple_GET_ITEM(args, 0)))
-        return PyErr_Format(PyExc_TypeError, "argument 1 must be a string or unicode object");
 
-    PyObject* value = PyUnicode_FromObject(PyTuple_GetItem(args, 0));
-    if (value)
-    {
-        if (PyBytes_Check(value) && PyBytes_Size(value) == 1)
-            chDecimal = (Py_UNICODE)PyBytes_AS_STRING(value)[0];
-        if (PyUnicode_Check(value) && PyUnicode_GET_SIZE(value) == 1)
-            chDecimal = PyUnicode_AS_UNICODE(value)[0];
-    }
+    const char* sz;
+    if (PyArg_ParseTuple(args, "s", &sz))
+      return 0;
+
+    chDecimal = sz[0];
     Py_RETURN_NONE;
 }
 
 static PyObject* mod_getdecimalsep(PyObject* self)
 {
     UNUSED(self);
-    return PyUnicode_FromUnicode(&chDecimal, 1);
+    return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, &chDecimal, 1);
 }
 
 static char connect_doc[] =
