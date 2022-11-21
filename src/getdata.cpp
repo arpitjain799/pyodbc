@@ -88,7 +88,7 @@ static bool ReadVarColumn(Cursor* cur, Py_ssize_t iCol, SQLSMALLINT ctype, bool&
     pbResult = 0;
     cbResult = 0;
 
-    const Py_ssize_t cbElement = (Py_ssize_t)(IsWideType(ctype) ? sizeof(ODBCCHAR) : 1);
+    const Py_ssize_t cbElement = (Py_ssize_t)(IsWideType(ctype) ? sizeof(uint16_t) : 1);
     const Py_ssize_t cbNullTerminator = IsBinaryType(ctype) ? 0 : cbElement;
 
     // TODO: Make the initial allocation size configurable?
@@ -265,7 +265,7 @@ static PyObject* GetText(Cursor* cur, Py_ssize_t iCol)
         Py_RETURN_NONE;
     }
 
-    PyObject* result = TextBufferToObject(enc, pbData, cbData);
+    PyObject* result = StringFromBuffer(enc, pbData, cbData);
 
     PyMem_Free(pbData);
 
@@ -365,7 +365,7 @@ static PyObject* GetDataDecimal(Cursor* cur, Py_ssize_t iCol)
         Py_RETURN_NONE;
     }
 
-    Object result(TextBufferToObject(enc, pbData, cbData));
+    Object result(StringFromBuffer(enc, pbData, cbData));
 
     PyMem_Free(pbData);
 
@@ -374,7 +374,7 @@ static PyObject* GetDataDecimal(Cursor* cur, Py_ssize_t iCol)
 
     // Remove non-digits and convert the databases decimal to a '.' (required by decimal ctor).
     //
-    // We are assuming that the decimal point and digits fit within the size of ODBCCHAR.
+    // We are assuming that the decimal point and digits fit within the size of uint16_t.
 
     // If Unicode, convert to UTF-8 and copy the digits and punctuation out.  Since these are
     // all ASCII characters, we can ignore any multiple-byte characters.  Fortunately, if a
