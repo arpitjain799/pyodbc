@@ -2,7 +2,7 @@
 
 VERSION = '5.0.0'
 
-import sys, os, re, shlex
+import sys, os, re, shlex, subprocess
 from os.path import exists, abspath, dirname, join, isdir, relpath, expanduser
 from inspect import cleandoc
 
@@ -11,6 +11,11 @@ from setuptools.extension import Extension
 from setuptools.errors import *
 
 from configparser import ConfigParser
+
+
+def _run(cmd):
+    return subprocess.run(cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                          encoding='utf_8', shell=True).stdout
 
 
 def main():
@@ -138,10 +143,10 @@ def get_compiler_settings():
         # Python functions take a lot of 'char *' that really should be const.  gcc complains about this *a lot*
         settings['extra_compile_args'].append('-Wno-write-strings')
 
-        cflags = os.popen('odbc_config --cflags 2>/dev/null').read().strip()
+        cflags = _run('odbc_config --cflags 2>/dev/null').strip()
         if cflags:
             settings['extra_compile_args'].extend(cflags.split())
-        ldflags = os.popen('odbc_config --libs 2>/dev/null').read().strip()
+        ldflags = _run('odbc_config --libs 2>/dev/null').strip()
         if ldflags:
             settings['extra_link_args'].extend(ldflags.split())
 
